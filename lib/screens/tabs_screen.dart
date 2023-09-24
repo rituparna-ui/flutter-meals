@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meals_app/models/meal.dart';
+import 'package:meals_app/providers/favourites_provider.dart';
 import 'package:meals_app/providers/meals_provider.dart';
 import 'package:meals_app/screens/categories.dart';
 import 'package:meals_app/screens/filters.dart';
@@ -30,18 +30,7 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     });
   }
 
-  final List<Meal> favourites = [];
-
   Map<String, bool> selectedFilers = kInitialFilters;
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
-  }
 
   void _selectScreen(String screen) async {
     // Close the drawer
@@ -58,20 +47,6 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
         selectedFilers = filters!;
       });
     }
-  }
-
-  void _toggleFavouriteMeal(Meal meal) {
-    final isPresent = favourites.contains(meal);
-
-    setState(() {
-      if (isPresent) {
-        favourites.remove(meal);
-        _showSnackBar('Meal removed from favourites');
-      } else {
-        favourites.add(meal);
-        _showSnackBar('Meal added to favourites');
-      }
-    });
   }
 
   @override
@@ -94,7 +69,6 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     }).toList();
 
     Widget activePage = CategoriesScreen(
-      toggleFavouriteMeal: _toggleFavouriteMeal,
       availableMeals: avaiableMeals,
     );
     String activePageTitle = 'Pick your Category';
@@ -102,7 +76,6 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     if (_selectedPageIndex == 0) {
       setState(() {
         activePage = CategoriesScreen(
-          toggleFavouriteMeal: _toggleFavouriteMeal,
           availableMeals: avaiableMeals,
         );
         activePageTitle = 'Pick your Category';
@@ -110,8 +83,7 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     } else {
       setState(() {
         activePage = MealsScreen(
-          meals: favourites,
-          toggleFavouriteMeal: _toggleFavouriteMeal,
+          meals: ref.watch(favMealsProvider),
         );
         activePageTitle = 'Favourites';
       });
