@@ -1,81 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:meals_app/models/meal.dart';
-import 'package:meals_app/providers/favourites_provider.dart';
+import 'package:meals_app/providers/favorites_provider.dart';
 
 class MealDetailsScreen extends ConsumerWidget {
-  final Meal meal;
-
   const MealDetailsScreen({
     super.key,
     required this.meal,
   });
 
+  final Meal meal;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteMeals = ref.watch(favoriteMealsProvider);
+
+    final isFavorite = favoriteMeals.contains(meal);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(meal.title),
-        actions: [
-          IconButton(
-            onPressed: () {
-              bool kek =
-                  ref.read(favMealsProvider.notifier).toggleFavMeal(meal);
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(!kek ? 'Meal Removed' : 'Meal Added'),
-                ),
-              );
-            },
-            icon: const Icon(Icons.star),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(meal.title), actions: [
+        IconButton(
+          onPressed: () {
+            final wasAdded = ref
+                .read(favoriteMealsProvider.notifier)
+                .toggleMealFavoriteStatus(meal);
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    wasAdded ? 'Meal added as a favorite.' : 'Meal removed.'),
+              ),
+            );
+          },
+          icon: Icon(isFavorite ? Icons.star : Icons.star_border),
+        )
+      ]),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.network(
-                meal.imageUrl,
-                height: 300,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+            Image.network(
+              meal.imageUrl,
+              height: 300,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Text(
               'Ingredients',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge!
-                  .copyWith(color: Theme.of(context).colorScheme.primary),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            const SizedBox(height: 16),
-            for (final ingredients in meal.ingredients)
+            const SizedBox(height: 14),
+            for (final ingredient in meal.ingredients)
               Text(
-                ingredients,
+                ingredient,
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onBackground,
                     ),
               ),
             const SizedBox(height: 24),
             Text(
               'Steps',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge!
-                  .copyWith(color: Theme.of(context).colorScheme.primary),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            for (final ingredients in meal.steps)
+            const SizedBox(height: 14),
+            for (final step in meal.steps)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Text(
-                  ingredients,
+                  step,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onBackground,
                       ),
                 ),
               ),

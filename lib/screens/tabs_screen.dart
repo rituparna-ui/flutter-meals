@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/providers/favourites_provider.dart';
+import 'package:meals_app/providers/filters_provider.dart';
 import 'package:meals_app/providers/meals_provider.dart';
 import 'package:meals_app/screens/categories.dart';
 import 'package:meals_app/screens/filters.dart';
@@ -8,10 +9,10 @@ import 'package:meals_app/screens/meals.dart';
 import 'package:meals_app/widgets/main_drawer.dart';
 
 const kInitialFilters = {
-  "glutenFilter": false,
-  "lactoseFilter": false,
-  "vegFilter": false,
-  "veganFilter": false,
+  Filter.glutenFree: false,
+  Filter.lactoseFree: false,
+  Filter.vegetarian: false,
+  Filter.vegan: false,
 };
 
 class TabsScreen extends ConsumerStatefulWidget {
@@ -30,13 +31,13 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
     });
   }
 
-  Map<String, bool> selectedFilers = kInitialFilters;
+  Map<Filter, bool> selectedFilers = kInitialFilters;
 
   void _selectScreen(String screen) async {
     // Close the drawer
     Navigator.of(context).pop();
     if (screen == 'filters') {
-      final filters = await Navigator.of(context).push<Map<String, bool>>(
+      final filters = await Navigator.of(context).push<Map<Filter, bool>>(
         MaterialPageRoute(
           builder: (ctx) {
             return const FiltersScreen();
@@ -53,16 +54,16 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
   Widget build(BuildContext context) {
     final meals = ref.watch(mealsProvider);
     final avaiableMeals = meals.where((meal) {
-      if (selectedFilers['glutenFilter']! && !meal.isGlutenFree) {
+      if (selectedFilers[Filter.glutenFree]! && !meal.isGlutenFree) {
         return false;
       }
-      if (selectedFilers['lactoseFilter']! && !meal.isLactoseFree) {
+      if (selectedFilers[Filter.lactoseFree]! && !meal.isLactoseFree) {
         return false;
       }
-      if (selectedFilers['vegFilter']! && !meal.isVegetarian) {
+      if (selectedFilers[Filter.vegetarian]! && !meal.isVegetarian) {
         return false;
       }
-      if (selectedFilers['veganFilter']! && !meal.isVegan) {
+      if (selectedFilers[Filter.vegan]! && !meal.isVegan) {
         return false;
       }
       return true;
